@@ -82,4 +82,151 @@
 
   @keyframes fall {
     to {
-      transfo
+      transform: translateY(110vh) rotate(720deg);
+      opacity: 0;
+    }
+  }
+
+  /* paillettes */
+  .sparkle {
+    position: fixed;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: radial-gradient(circle, white, gold);
+    animation: sparkle 2.5s ease-out forwards;
+  }
+
+  @keyframes sparkle {
+    to {
+      transform: translateY(-80vh) scale(0);
+      opacity: 0;
+    }
+  }
+
+  #finalMessage {
+    max-width: 700px;
+    margin: 40px auto;
+    font-size: 1.15em;
+    line-height: 1.6;
+    display: none;
+    animation: fadeIn 2s ease forwards;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+
+<body>
+
+<h1>🎄 Joyeux Noël 🎄</h1>
+<p>Grattez pour découvrir vos surprises ✨</p>
+
+<div class="container">
+  <div class="scratch-card">Carnet créatif</div>
+  <div class="scratch-card">Sweat ergo CTR</div>
+  <div class="scratch-card">Souper d'équipe</div>
+</div>
+
+<div id="finalMessage">
+  ✨<br><br>
+  Que ce Noël soit l'occasion d'enfin concrétiser le logo et les sweat Ergo CTR,  
+  de planifier un repas d'équipe fin janvier et au 1er janvier,  
+  on inaugure le premier carnet créatif de l'ergo.  
+  <br><br>
+  <strong>Passez de très belles fêtes 🎄✨</strong>
+</div>
+
+<!-- musique de Noël féérique -->
+<audio id="music" loop>
+  <source src="https://assets.mixkit.co/music/preview/mixkit-magical-christmas-2725.mp3" type="audio/mpeg">
+</audio>
+
+<!-- son de grattage -->
+<audio id="scratchSound">
+  <source src="https://assets.mixkit.co/sfx/preview/mixkit-scratch-card-2994.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+let revealedCount = 0;
+const music = document.getElementById("music");
+
+document.body.addEventListener("click", () => {
+  if (music.paused) music.play().catch(()=>{});
+}, { once: true });
+
+document.querySelectorAll(".scratch-card").forEach(card => {
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+  canvas.width = card.offsetWidth;
+  canvas.height = card.offsetHeight;
+  card.appendChild(canvas);
+
+  ctx.fillStyle = "#bfc1c2";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.globalCompositeOperation = "destination-out";
+
+  let scratching = false;
+  let revealed = false;
+
+  function getPos(e){
+    const r = canvas.getBoundingClientRect();
+    const p = e.touches ? e.touches[0] : e;
+    return { x: p.clientX - r.left, y: p.clientY - r.top };
+  }
+
+  function scratch(e){
+    if(!scratching) return;
+    e.preventDefault();
+    const pos = getPos(e);
+    ctx.beginPath();
+    ctx.arc(pos.x,pos.y,20,0,Math.PI*2);
+    ctx.fill();
+    document.getElementById("scratchSound").play().catch(()=>{});
+
+    if(!revealed){
+      revealed = true;
+      revealedCount++;
+      if(revealedCount === 3){
+        celebrate();
+      }
+    }
+  }
+
+  canvas.addEventListener("mousedown", ()=>scratching=true);
+  canvas.addEventListener("mouseup", ()=>scratching=false);
+  canvas.addEventListener("mousemove", scratch);
+  canvas.addEventListener("touchstart", ()=>scratching=true);
+  canvas.addEventListener("touchend", ()=>scratching=false);
+  canvas.addEventListener("touchmove", scratch);
+});
+
+function celebrate(){
+  document.getElementById("finalMessage").style.display = "block";
+
+  for(let i=0;i<120;i++){
+    const c = document.createElement("div");
+    c.className = "confetti";
+    c.style.left = Math.random()*100+"vw";
+    c.style.background = ["gold","red","green","white"][Math.floor(Math.random()*4)];
+    c.style.animationDelay = Math.random()+"s";
+    document.body.appendChild(c);
+    setTimeout(()=>c.remove(),3000);
+  }
+
+  for(let i=0;i<80;i++){
+    const s = document.createElement("div");
+    s.className = "sparkle";
+    s.style.left = Math.random()*100+"vw";
+    s.style.top = "100vh";
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),2500);
+  }
+}
+</script>
+
+</body>
+</html>
